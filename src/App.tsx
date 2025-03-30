@@ -264,7 +264,7 @@ export default function C2PAViewer() {
           {image.content ? (
             <div className="relative w-full h-[600px]">
               {image.content && (
-                <CheckCircleIcon className="w-8 h-8 absolute top-5 right-5 text-green-500" />
+                <CheckCircleIcon className="w-6 h-6 absolute top-1 right-1 text-green-500" />
               )}
               <img
                 src={image.bloblURL || '/placeholder.svg'}
