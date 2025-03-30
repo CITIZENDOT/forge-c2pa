@@ -1,17 +1,17 @@
-import { fileTypeFromBuffer } from "file-type";
+import { fileTypeFromBuffer } from 'file-type'
 
-const SUPPORTED_TYPES = ["image/png"];
+const SUPPORTED_TYPES = ['image/png']
 
 export async function checkFileType(fileContent: ArrayBuffer) {
-  const type = await fileTypeFromBuffer(fileContent);
+  const type = await fileTypeFromBuffer(fileContent)
   if (!type) {
     return {
-        isSupported: false,
-        mimeType: "",
-    };
+      isSupported: false,
+      mimeType: '',
+    }
   }
   return {
     isSupported: SUPPORTED_TYPES.includes(type.mime),
     mimeType: type.mime,
-  };
+  }
 }

@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import type React from "react";
+import type React from 'react'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 import {
   Upload,
   Camera,
@@ -10,49 +10,49 @@ import {
   BookImage,
   LoaderCircle,
   CheckCircleIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { execute } from "wasm-imagemagick";
-import { addMetadataToPng } from "@/pngUtil";
-import { quote } from "shell-quote";
-import { checkFileType } from "./utils";
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { execute } from 'wasm-imagemagick'
+import { addMetadataToPng } from '@/pngUtil'
+import { quote } from 'shell-quote'
+import { checkFileType } from './utils'
 
 export default function C2PAViewer() {
   const [image, setImage] = useState<{
-    content: Uint8Array | null;
-    fileType: string;
-    fileName: string;
-    bloblURL: string;
-    mimeType: string;
+    content: Uint8Array | null
+    fileType: string
+    fileName: string
+    bloblURL: string
+    mimeType: string
   }>({
     content: null,
-    fileType: "",
-    fileName: "",
-    bloblURL: "",
-    mimeType: "",
-  });
+    fileType: '',
+    fileName: '',
+    bloblURL: '',
+    mimeType: '',
+  })
   const [processedImageURL, setProcessedImageURL] = useState<{
-    content: Uint8Array | ArrayBuffer | null;
-    blobURL: string;
+    content: Uint8Array | ArrayBuffer | null
+    blobURL: string
   }>({
     content: null,
-    blobURL: "",
-  });
-  const [imageFormatError, setImageFormatError] = useState("");
+    blobURL: '',
+  })
+  const [imageFormatError, setImageFormatError] = useState('')
   const [loading, setLoading] = useState({
     isUploading: false,
     isStripping: false,
     isAddingIphoneMetadata: false,
     isAddingPhotoshopMetadata: false,
     isAddingGimpMetadata: false,
-  });
-  const [currentState, setCurrentState] = useState("idle");
+  })
+  const [currentState, setCurrentState] = useState('idle')
 
   useEffect(() => {
     const stripMetadata = async () => {
       if (image && image.content) {
-        const extension = "png"; // TODO: Get extension from image
+        const extension = 'png' // TODO: Get extension from image
         const { outputFiles, exitCode, stderr } = await execute({
           inputFiles: [
             {
@@ -62,149 +62,149 @@ export default function C2PAViewer() {
           ],
           commands: [
             quote([
-              "convert",
+              'convert',
               image.fileName,
-              "-strip",
+              '-strip',
               `cleaned.${extension}`,
             ]),
           ],
-        });
+        })
 
         if (exitCode === 0 && outputFiles.length > 0 && outputFiles[0].buffer) {
-          const outputBlobURL = URL.createObjectURL(outputFiles[0].blob);
+          const outputBlobURL = URL.createObjectURL(outputFiles[0].blob)
           setProcessedImageURL({
             content: outputFiles[0].buffer,
             blobURL: outputBlobURL,
-          });
-          console.log("Stripped metadata from image");
-          setCurrentState("stripped");
+          })
+          console.log('Stripped metadata from image')
+          setCurrentState('stripped')
         } else {
           console.error(
-            "Failed to strip metadata from image",
+            'Failed to strip metadata from image',
             stderr,
             exitCode,
             outputFiles
-          );
-          setImageFormatError("Failed to strip metadata from image");
+          )
+          setImageFormatError('Failed to strip metadata from image')
           setImage({
             content: null,
-            fileType: "",
-            fileName: "",
-            bloblURL: "",
-            mimeType: "",
-          });
+            fileType: '',
+            fileName: '',
+            bloblURL: '',
+            mimeType: '',
+          })
         }
       }
-    };
+    }
 
-    stripMetadata();
-  }, [image]);
+    stripMetadata()
+  }, [image])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoading({ ...loading, isUploading: true });
+    setLoading({ ...loading, isUploading: true })
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
+      const file = e.target.files[0]
+      const reader = new FileReader()
       reader.onload = async (event) => {
         if (event.target) {
-          const content = new Uint8Array(event.target.result as ArrayBuffer);
-          const { isSupported, mimeType } = await checkFileType(content);
+          const content = new Uint8Array(event.target.result as ArrayBuffer)
+          const { isSupported, mimeType } = await checkFileType(content)
 
           if (isSupported) {
-            const blobURL = URL.createObjectURL(file);
+            const blobURL = URL.createObjectURL(file)
             setImage({
               content: content,
               fileType: file.type,
               fileName: file.name,
               bloblURL: blobURL,
               mimeType: mimeType,
-            });
-            setCurrentState("uploaded");
+            })
+            setCurrentState('uploaded')
           } else {
-            console.error("Unsupported file type");
+            console.error('Unsupported file type')
             setImageFormatError(
-              "Unsupported file type. Currently only PNG files are supported."
-            );
+              'Unsupported file type. Currently only PNG files are supported.'
+            )
           }
         }
-      };
-      reader.readAsArrayBuffer(file);
+      }
+      reader.readAsArrayBuffer(file)
     }
-    setLoading({ ...loading, isUploading: false });
-  };
+    setLoading({ ...loading, isUploading: false })
+  }
 
-  const addMetadata = (type: "iPhone" | "Photoshop" | "GIMP") => {
-    if (type === "iPhone") {
-      setLoading({ ...loading, isAddingIphoneMetadata: true });
-    } else if (type === "Photoshop") {
-      setLoading({ ...loading, isAddingPhotoshopMetadata: true });
-    } else if (type === "GIMP") {
-      setLoading({ ...loading, isAddingGimpMetadata: true });
+  const addMetadata = (type: 'iPhone' | 'Photoshop' | 'GIMP') => {
+    if (type === 'iPhone') {
+      setLoading({ ...loading, isAddingIphoneMetadata: true })
+    } else if (type === 'Photoshop') {
+      setLoading({ ...loading, isAddingPhotoshopMetadata: true })
+    } else if (type === 'GIMP') {
+      setLoading({ ...loading, isAddingGimpMetadata: true })
     }
 
-    let metaData = {};
+    let metaData = {}
 
-    if (type === "iPhone") {
+    if (type === 'iPhone') {
       metaData = {
-        Make: "Apple",
-        Model: "iPhone 14 Pro",
-        Software: "iOS 17.4",
-        DateTime: "2025:03:30 14:15:22",
-        ExposureTime: "1/120",
-        FNumber: "1.78",
-        ISO: "100",
-        FocalLength: "6.86 mm",
-        LensModel: "iPhone 14 Pro Main Camera",
-        Flash: "Flash did not fire",
-        GPSLatitude: "37.7749 N",
-        GPSLongitude: "122.4194 W",
-        ColorProfile: "Display P3",
-      };
-    } else if (type === "GIMP") {
+        Make: 'Apple',
+        Model: 'iPhone 14 Pro',
+        Software: 'iOS 17.4',
+        DateTime: '2025:03:30 14:15:22',
+        ExposureTime: '1/120',
+        FNumber: '1.78',
+        ISO: '100',
+        FocalLength: '6.86 mm',
+        LensModel: 'iPhone 14 Pro Main Camera',
+        Flash: 'Flash did not fire',
+        GPSLatitude: '37.7749 N',
+        GPSLongitude: '122.4194 W',
+        ColorProfile: 'Display P3',
+      }
+    } else if (type === 'GIMP') {
       metaData = {
-        Software: "GIMP 2.10.36",
-        DateTime: "2025:03:30 15:30:50",
-        Artist: "Anonymous Editor",
-        Copyright: "© 2025 Anonymous",
-        Comment: "Created with GIMP",
-        Compression: "Deflate",
-        ColorProfile: "sRGB",
-      };
-    } else if (type === "Photoshop") {
+        Software: 'GIMP 2.10.36',
+        DateTime: '2025:03:30 15:30:50',
+        Artist: 'Anonymous Editor',
+        Copyright: '© 2025 Anonymous',
+        Comment: 'Created with GIMP',
+        Compression: 'Deflate',
+        ColorProfile: 'sRGB',
+      }
+    } else if (type === 'Photoshop') {
       metaData = {
-        Software: "Adobe Photoshop 2024",
-        DateTime: "2025:03:30 12:45:10",
-        Artist: "Anonymous Designer",
-        Copyright: "© 2025 Adobe Systems",
-        Comment: "Edited in Adobe Photoshop",
-        ColorProfile: "Adobe RGB",
-        Compression: "Uncompressed",
-        ResolutionUnit: "2", // 2 = Inches
-        XResolution: "300",
-        YResolution: "300",
-      };
+        Software: 'Adobe Photoshop 2024',
+        DateTime: '2025:03:30 12:45:10',
+        Artist: 'Anonymous Designer',
+        Copyright: '© 2025 Adobe Systems',
+        Comment: 'Edited in Adobe Photoshop',
+        ColorProfile: 'Adobe RGB',
+        Compression: 'Uncompressed',
+        ResolutionUnit: '2', // 2 = Inches
+        XResolution: '300',
+        YResolution: '300',
+      }
     }
 
     if (processedImageURL.content) {
-      const newBuffer = addMetadataToPng(processedImageURL.content, metaData);
+      const newBuffer = addMetadataToPng(processedImageURL.content, metaData)
       setProcessedImageURL({
         content: newBuffer,
         blobURL: URL.createObjectURL(
           new Blob([newBuffer], { type: image.mimeType })
         ),
-      });
-      console.log("Added metadata to image");
+      })
+      console.log('Added metadata to image')
     }
 
-    if (type === "iPhone") {
-      setLoading({ ...loading, isAddingIphoneMetadata: false });
-    } else if (type === "Photoshop") {
-      setLoading({ ...loading, isAddingPhotoshopMetadata: false });
-    } else if (type === "GIMP") {
-      setLoading({ ...loading, isAddingGimpMetadata: false });
+    if (type === 'iPhone') {
+      setLoading({ ...loading, isAddingIphoneMetadata: false })
+    } else if (type === 'Photoshop') {
+      setLoading({ ...loading, isAddingPhotoshopMetadata: false })
+    } else if (type === 'GIMP') {
+      setLoading({ ...loading, isAddingGimpMetadata: false })
     }
-    setCurrentState("metadata-added");
-  };
+    setCurrentState('metadata-added')
+  }
 
   return (
     <div className="relative container mx-auto px-4 py-8 w-full h-screen">
@@ -224,14 +224,14 @@ export default function C2PAViewer() {
         </p>
         <ol className="list-decimal list-inside mt-1.5">
           <li>
-            You can verify the original image’s C2PA signature at{" "}
+            You can verify the original image’s C2PA signature at{' '}
             <a
               className="text-cyan-600 hover:underline underline-offset-4"
               target="_blank"
               href="https://contentcredentials.org/verify"
             >
               https://contentcredentials.org/verify
-            </a>{" "}
+            </a>{' '}
             to check its authenticity.
           </li>
           <li>
@@ -239,7 +239,7 @@ export default function C2PAViewer() {
             with fake metadata (iPhone, Photoshop etc..)
           </li>
           <li>
-            You can then verify the modified metadata using online viewers like:{" "}
+            You can then verify the modified metadata using online viewers like:{' '}
             <a
               className="text-cyan-600 hover:underline underline-offset-4"
               target="_blank"
@@ -247,7 +247,7 @@ export default function C2PAViewer() {
             >
               https://jimpl.com
             </a>
-            ,{" "}
+            ,{' '}
             <a
               className="text-cyan-600 hover:underline underline-offset-4"
               target="_blank"
@@ -267,7 +267,7 @@ export default function C2PAViewer() {
                 <CheckCircleIcon className="w-8 h-8 absolute top-5 right-5 text-green-500" />
               )}
               <img
-                src={image.bloblURL || "/placeholder.svg"}
+                src={image.bloblURL || '/placeholder.svg'}
                 alt="Uploaded image"
                 className="w-full h-full object-contain"
               />
@@ -303,17 +303,17 @@ export default function C2PAViewer() {
         <div className="space-y-4">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">
-              Add <span className="text-[0.6rem] font-light">fake</span>{" "}
+              Add <span className="text-[0.6rem] font-light">fake</span>{' '}
               Metadata
             </h2>
             <div className="space-y-3">
               <Button
                 className="w-full justify-start"
-                onClick={() => addMetadata("iPhone")}
+                onClick={() => addMetadata('iPhone')}
                 disabled={
                   !image ||
-                  currentState === "idle" ||
-                  currentState === "uploaded"
+                  currentState === 'idle' ||
+                  currentState === 'uploaded'
                 }
               >
                 <Camera />
@@ -324,11 +324,11 @@ export default function C2PAViewer() {
               </Button>
               <Button
                 className="w-full justify-start"
-                onClick={() => addMetadata("Photoshop")}
+                onClick={() => addMetadata('Photoshop')}
                 disabled={
                   !image ||
-                  currentState === "idle" ||
-                  currentState === "uploaded"
+                  currentState === 'idle' ||
+                  currentState === 'uploaded'
                 }
               >
                 <BookImage />
@@ -339,11 +339,11 @@ export default function C2PAViewer() {
               </Button>
               <Button
                 className="w-full justify-start"
-                onClick={() => addMetadata("GIMP")}
+                onClick={() => addMetadata('GIMP')}
                 disabled={
                   !image ||
-                  currentState === "idle" ||
-                  currentState === "uploaded"
+                  currentState === 'idle' ||
+                  currentState === 'uploaded'
                 }
               >
                 🐧 Add GIMP metadata
@@ -353,8 +353,8 @@ export default function C2PAViewer() {
               </Button>
             </div>
           </Card>
-          {currentState === "stripped" && (
-            <a href={processedImageURL.blobURL || ""} download={image.fileName}>
+          {currentState === 'stripped' && (
+            <a href={processedImageURL.blobURL || ''} download={image.fileName}>
               <Button
                 className="w-full"
                 size="lg"
@@ -365,8 +365,8 @@ export default function C2PAViewer() {
               </Button>
             </a>
           )}
-          {currentState === "metadata-added" && (
-            <a href={processedImageURL.blobURL || ""} download={image.fileName}>
+          {currentState === 'metadata-added' && (
+            <a href={processedImageURL.blobURL || ''} download={image.fileName}>
               <Button
                 className="w-full"
                 size="lg"
@@ -381,7 +381,7 @@ export default function C2PAViewer() {
       </div>
 
       <p className="w-full text-center mt-3">
-        Built by{" "}
+        Built by{' '}
         <a
           href="https://github.com/CITIZENDOT"
           className="text-cyan-600 hover:underline underline-offset-4"
@@ -391,5 +391,5 @@ export default function C2PAViewer() {
         </a>
       </p>
     </div>
-  );
+  )
 }
